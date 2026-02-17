@@ -53,3 +53,29 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# grafix demo binaries (no extension)
+grafix-1.4/class-browser
+grafix-1.4/earth
+grafix-1.4/hello
+grafix-1.4/win-demo
+grafix-1.4/edit-demo
+grafix-1.4/file-browser
+grafix-1.4/cursors
+grafix-1.4/calc
+grafix-1.4/dir-tree
+grafix-1.4/font-browser
+grafix-1.4/pal-demo
+grafix-1.4/lat-demo
+grafix-1.4/lat2demo
+grafix-1.4/one-dim
+grafix-1.4/two-dim
+grafix-1.4/clock-demo
+grafix-1.4/three-dim
+grafix-1.4/replay
+grafix-1.4/mandel
+grafix-1.4/scrolled_demo
+grafix-1.4/hardcopy
+
+# scratch 
+scratch/
