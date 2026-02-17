@@ -398,14 +398,18 @@ void integrator::reinit() {
   anim.init_write(video_file,header,nx,ny); 
 }
 
+static void player_pmset_cb(void *vp) {
+  ((player *)vp)->refresh_poll_mode();
+}
+
 void integrator::start() {
   reinit();
   init_lat(); // must be done here !
   // add buttons unique to primer window
-  new instance_button <integrator> (*mb,"reinit",this->reinit, this);
+  new instance_button <integrator> (*mb,"reinit",&integrator::reinit, this);
   new instance_button <integrator> (*mb,">",&integrator::step_handler,this);
-  new switch_button(*mb,">>","||",&step_mode, (VVP) &player::pmset, this);
-  new instance_button <play_main> (*mb,"spawn",this->spawn,this);
+  new switch_button(*mb,">>","||",&step_mode, &player_pmset_cb, this);
+  new instance_button <play_main> (*mb,"spawn",&play_main::spawn,this);
   new quit_button(*mb);
     
   main_loop();
@@ -497,4 +501,3 @@ void slave::pstep() { // used as poll handler for synchronized processes
   make_step(istep);
   kill(0,SIGUSR1); // awake parent process from sigpause !
 }
-

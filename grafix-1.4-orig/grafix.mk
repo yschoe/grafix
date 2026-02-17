@@ -15,7 +15,10 @@ GCCINC = ./gccinc
 ifeq ($(shell uname),Linux)
   XPATH = /usr/X11R6
   LFLAGS = -L$(XPATH)/lib
-  CFLAGS = -Wall -I$(GCCINC) -DLINUX 
+  # Modern Linux toolchains must use system glibc headers; the legacy
+  # gccinc copy shadows them and breaks preprocessing.
+  CFLAGS = -Wall -DLINUX -std=gnu++98 -fpermissive -Wno-narrowing \
+           -Wno-write-strings
 endif
 
 ifeq ($(shell uname),SunOS)
@@ -55,4 +58,3 @@ AR = ar rc
 
 %: %.o
 	$(CC) -o $@ $^ $(LFLAGS) 
-

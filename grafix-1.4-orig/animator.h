@@ -148,6 +148,7 @@ protected:
   Bool step_mode; // special polling handler 
   void pmset() { polling_mode = rot_mode || step_mode; }
 public:
+  void refresh_poll_mode() { pmset(); }
   player(animator *animp, int *tptr, Bool top = False);
   void play();
   void stop(); // to toggle step_mode;

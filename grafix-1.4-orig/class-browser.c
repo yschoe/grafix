@@ -107,13 +107,13 @@ class Regexp {
 public:
   char *exp;
   Regexp(char *exp) : exp(exp) { 
-    rpb.buffer = malloc(100); 
-    rpb.allocated = 100;
+    rpb.buffer = 0;
+    rpb.allocated = 0;
     rpb.translate = 0;
     rpb.fastmap = (char *) malloc(256);
     re_compile_pattern(exp,strlen(exp),&rpb);
   }
-  Search(char *string, int size) { 
+  int Search(char *string, int size) { 
     int pos = re_search(&rpb,string,size,0,size,0);
     if (pos < 0) return -1;
     int match = re_match(&rpb,string,size,pos,0);
@@ -331,7 +331,7 @@ public:
     // can be called dynamically
     // suppositions : initial depth values = 0
 
-    int nloop = 0, maxnloop = 1000000 >? (nclasses*nclasses*nclasses);
+    int nloop = 0, maxnloop = MAX(1000000, (nclasses*nclasses*nclasses));
     Clist *cl = cll; 
     do { 
       ClassTree *ci = cl->car;

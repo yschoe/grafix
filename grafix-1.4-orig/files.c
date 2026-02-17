@@ -126,7 +126,7 @@ public:
 void file_display::redraw() { 
   plate::redraw(); 
   // if string too long cut it *lefthand* !! charwidth = 6 !!
-  int offset =  (int(strlen(val)) - (width-6)/6 ) >? 0; 
+  int offset = MAX(int(strlen(val)) - (width-6)/6, 0); 
   PlaceText(val+offset); 
 }
 
@@ -287,7 +287,7 @@ void selector::resize(int w, int h) {
 }
 
 void selector::shift(int ip) { // set ishift to ip, set slider, redraw
-  ip = ip >? 0; ip = ip <? ispan(); // limit to range [0..ispan]
+  ip = MAX(ip, 0); ip = MIN(ip, ispan()); // limit to range [0..ispan]
   if (ip != ishift) {
     ishift = ip;
     vs->set_slider_rel(ishift/float(itot-itdsp)); 
@@ -367,6 +367,22 @@ public:
   char pwd[100]; // current directory path
   int fits, dits;
 private:
+  static void make_select_cb(void *inst, char *mask) {
+    ((file_selection_box *)inst)->make_select(mask);
+  }
+  static void dsel_cb_proxy(void *inst, char *val) {
+    ((file_selection_box *)inst)->dsel_cb(val);
+  }
+  static void cd_cb_proxy(void *inst, char *val) {
+    ((file_selection_box *)inst)->cd_cb(val);
+  }
+  static void fsel_cb_proxy(void *inst, char *val) {
+    ((file_selection_box *)inst)->fsel_cb(val);
+  }
+  static void ok_cb_proxy(void *inst, char * /*val*/) {
+    ((file_selection_box *)inst)->ok();
+  }
+
   edit_window *mask_ed;
   file_display *fdsp;
   selector *fsel,*dsel;
@@ -435,12 +451,12 @@ public:
     char empty = 0; fname = &empty; 
     fdsp = new file_display(*this,200,20,10,10);
     new text_win(*this,"selection mask",200,20,10,30);
-    mask_ed = new mask_edit(*this, (VPCP) &make_select, this,200,20,10,50);
+    mask_ed = new mask_edit(*this, &make_select_cb, this,200,20,10,50);
     // directory selector 
-    dsel = new selector(*this, ITDISP, (VPCP) &dsel_cb, (VPCP) &cd_cb,
+    dsel = new selector(*this, ITDISP, &dsel_cb_proxy, &cd_cb_proxy,
 		       80,0,10,80,BHEIGHT);
     // file selector
-    fsel = new selector(*this, ITDISP, (VPCP) &fsel_cb, (VPCP) &ok,
+    fsel = new selector(*this, ITDISP, &fsel_cb_proxy, &ok_cb_proxy,
 		       110,100,100,80,BHEIGHT);
     okb = new instance_button <file_selection_box> 
                  (*this,"Ok",&file_selection_box::ok,this,50,20,0,0);
@@ -533,7 +549,7 @@ public:
   }
 
   void shift(int i) { // shift starting line and redraw
-    i = i >? 0; i = i <? zz-zd; // limit ishift to range [0..zz-zd]
+    i = MAX(i, 0); i = MIN(i, zz-zd); // limit ishift to range [0..zz-zd]
     if (i == ishift) return;
     ishift = i; clear(); redraw();
   }
@@ -596,4 +612,3 @@ void text_viewer::KeyPress_CB(XKeyEvent ev) {
       case XK_Next: 	vs->jmp_callback(False); break;
     }
 }
-

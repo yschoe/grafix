@@ -12,6 +12,7 @@
 // #include "X11/Xutil.h"
 #include <X11/keysym.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -320,7 +321,7 @@ public:
     button(parent, "quit", w, h, x, y) {}
   quit_button(menu_bar & parent) : button(parent, "quit") {}
 private:
-  void BPress_1_CB(XButtonEvent) { mainw->exit_flag = TRUE; }
+  void BPress_1_CB(XButtonEvent) { _exit(0); }
 };
 
 // popup_button : realize the popup menu when BPress (make it visibel) 
@@ -969,9 +970,9 @@ public:
 class scrolled_window : public window {
   int xp, yp; // actual position
   int hvis,wvis; // visible window size
+public:
   // the hook called from shifters : shift drawing_area
   void cbhook(twodim_input *ts); 
-public:
   twodim_input *vs, *hs;
   window *clip; // the clipped region
   window *virt_win; // the virtual window

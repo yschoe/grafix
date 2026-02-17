@@ -131,8 +131,8 @@ main(int /* argc */, char *argv[])
   xwd_button xwd(*mainw,"dump"," | xwud &", mainw, w, h, x, y); 
   y+= 30;
   
-  new template_button <void*>(*mainw,"children",child_print,
-			      mainw, w, h, x, y);
+  new template_button <window*>(*mainw,"children",child_print,
+				      mainw, w, h, x, y);
   y+= 30;
 
   // radio button menu with display of toggled value
@@ -160,7 +160,6 @@ main(int /* argc */, char *argv[])
   mainw->main_loop();
   // delete mainw; -> is done automatically !
 }
-
 
 
 

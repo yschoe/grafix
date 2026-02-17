@@ -12,8 +12,8 @@ public:
   // second constructor : use it if ColorCells are already allocated
   palette_popup(int ncol, long unsigned *pixels); 
   void paint();
+  void set_pal(palstr *ps);
 private:
   unsigned palind(float min, float max, int i);
   void init_palette(int ncol);
-  void set_pal(palstr *ps);
 };

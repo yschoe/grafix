@@ -37,7 +37,7 @@ public:
   three_integrator(char *fina, char *video_file) :
     integrator(fina,video_file,NXP2,NYP2,100) { // every 100 sec write video
     d2disp *tdisp = new d2disp[NZP2]; 
-    int i, nz =  5 <? NZP2; // write only max. 5 arrays to save disk space
+    int i, nz =  MIN(5, NZP2); // write only max. 5 arrays to save disk space
     for (i=0; i < nz; i++) { 
       tdisp[i].name = new char[20]; sprintf(tdisp[i].name,"t layer %d",i);
       tdisp[i].array.darr = (double*) t[i]; 

@@ -146,8 +146,6 @@ class pde_window : public coord_window {
   }
 };
 
-extern "C" usleep(unsigned usecs); // sleep mikrosecs 
-
 pde_window * pwindow;
 
 void quit() { exit(0); }

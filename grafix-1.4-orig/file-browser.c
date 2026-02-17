@@ -65,10 +65,9 @@ void spawn(char *last_fina) { // creates a new window with the last file
 
 int main(int argc, char **argv) {
   // if argument given : display it
-  char *fina = (argc > 1) ? argv[1] : "files.c"; 
+  char *fina = (argc > 1) ? argv[1] : (char *)"files.c"; 
   spawn(fina) ;
 }
-
 
 
 

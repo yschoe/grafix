@@ -7,6 +7,7 @@ static char NLN[] = { 27, 74, 24, 0}; // Zeilenvorschub 24/216 = 1/8 Zoll
 static char InitSeq[] = { 27, 64, 0}; // initialize printer 
 
 #include "window.h"
+#include <errno.h>
 
 // macros for rgb = 565
 #define b565(c) ((c) & 31)
@@ -14,7 +15,7 @@ static char InitSeq[] = { 27, 64, 0}; // initialize printer
 #define r565(c) (((c) >> 11) & 31)
 #define lum565(c) (b565(c) + g565(c) + r565(c))
 
-extern "C" XDestroyImage(XImage *);
+extern "C" int XDestroyImage(XImage *);
 
 void scan(Bool top);  
 
@@ -51,7 +52,7 @@ public:
     }  
     menu_bar *mb = new menu_bar(*this,nx,20,0,0,0,nx/3); // maxw = nx/3
     new template_button <int> (*mb,"new",scan,0);
-    new instance_button <hardc_win> (*mb,"print",print,this);
+    new instance_button <hardc_win> (*mb,"print",&hardc_win::print,this);
     if (top) {
       new quit_button(*mb);
       main_loop(); 
@@ -127,4 +128,3 @@ void scan(Bool top) {
 main() {
   scan(True);
 }
-

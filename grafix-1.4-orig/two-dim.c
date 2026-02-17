@@ -229,11 +229,11 @@ int main (int /*argc*/, char * argv[]) {
   char *run_help[] = {"integrates the given number of time steps",0};
   make_radio_menu(mb, run_menu, run_list, run_help, two);
   
-  callback_button snapshot(mb,"snapshot",&snapshot); 
+  callback_button snapshot_btn(mb,"snapshot",::snapshot); 
   char *snap_help[] = {"'snapshot' spawnes a copy of the actual picture ",
 		       "as permanent lattice_manager window, ",
 		       "that will not be integrated further",0};    
-  snapshot.add_help(snap_help);
+  snapshot_btn.add_help(snap_help);
 
   char * help[] = {
     "Changing of parameters with the pulldown-menues in this menue-line ",
@@ -248,5 +248,4 @@ int main (int /*argc*/, char * argv[]) {
   mainw.main_loop();
 
 }
-
 

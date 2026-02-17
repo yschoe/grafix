@@ -240,20 +240,20 @@ lattice_window(parent,w,h-40,x,y), nx(nxp), ny(nyp), qptr(q)
   region_int = new region_manager(*region_win,this);
   clone_lm = NULL;
 
-  new modifier_button <float> (*mb1,"a+", inc_float,this,&alpha,0.1);
-  new modifier_button <float> (*mb2,"a-", inc_float,this,&alpha,-0.1);
+  new modifier_button <float> (*mb1,"a+", &lattice_manager::inc_float,this,&alpha,0.1);
+  new modifier_button <float> (*mb2,"a-", &lattice_manager::inc_float,this,&alpha,-0.1);
 
-  new modifier_button <float> (*mb1,"b+", inc_float,this,&beta,0.1);
-  new modifier_button <float> (*mb2,"b-", inc_float,this,&beta,-0.1); 
+  new modifier_button <float> (*mb1,"b+", &lattice_manager::inc_float,this,&beta,0.1);
+  new modifier_button <float> (*mb2,"b-", &lattice_manager::inc_float,this,&beta,-0.1); 
 
-  new modifier_button <float> (*mb1,"z+", mult_float, this, &gamma, 1.25); 
-  new modifier_button <float> (*mb2,"z-", mult_float, this, &gamma, 0.80); 
+  new modifier_button <float> (*mb1,"z+", &lattice_manager::mult_float, this, &gamma, 1.25); 
+  new modifier_button <float> (*mb2,"z-", &lattice_manager::mult_float, this, &gamma, 0.80); 
   
-  new modifier_button <float> (*mb1,"z0+", inc_z0, this, &z0, -0.1); 
-  new modifier_button <float> (*mb2,"z0-", inc_z0, this, &z0, 0.1); 
+  new modifier_button <float> (*mb1,"z0+", &lattice_manager::inc_z0, this, &z0, -0.1); 
+  new modifier_button <float> (*mb2,"z0-", &lattice_manager::inc_z0, this, &z0, 0.1); 
     
-  new modifier_button <float> (*mb1,"d+", inc_float, this, &dist, 0.01);   
-  new modifier_button <float> (*mb2,"d-", inc_float, this, &dist, -0.01);  
+  new modifier_button <float> (*mb1,"d+", &lattice_manager::inc_float, this, &dist, 0.01);   
+  new modifier_button <float> (*mb2,"d-", &lattice_manager::inc_float, this, &dist, -0.01);  
 
   new toggle_redraw_button(*mb1," rand ",&rand,this);
   new toggle_redraw_button(*mb2,"opaque",&opaque,this);
@@ -309,4 +309,3 @@ void lattice_manager::make_clone() {
 		      &lattice_manager::delete_clone, this, 100, 20,0,0);
   pp->do_popup(0,0);
 }
-

@@ -79,6 +79,7 @@ struct palstr fbar[] = { { "brown ", { {21, 4, 0 }, { 65, 65, 55} } },
                        };
 
 static void pal_paint(palette_popup * pp) { pp->paint(); };
+static void pal_set_cb(palette_popup *pp, palstr *ps) { pp->set_pal(ps); }
 
 // 1. constructor for palette_popup : creates a color palette and
 // a popup for displaying and manipulate the palettes   
@@ -127,7 +128,7 @@ void palette_popup::init_palette(int ncol) {
   int nbar = sizeof(fbar)/sizeof(palstr); // Elementzahl von fbar
   
   for (i=0; i < nbar; i++)
-    new function_button(*mb,fbar[i].Name,(CB) set_pal, this, fbar+i);
+    new function_button(*mb,fbar[i].Name,(CB) pal_set_cb, this, fbar+i);
 
   new palette_display(*this,370,50,x,y,this); y+= 60;
   new unmap_button(*this,"close",100,20,130,y);
@@ -139,4 +140,3 @@ void palette_popup::set_pal(palstr *ps) {
    smin[i]->change(ps->limits[0][i]*1000); 
    smax[i]->change(ps->limits[1][i]*1000); }
 }
-

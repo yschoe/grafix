@@ -83,9 +83,9 @@ static void divi(int &x, int y) { if (y == 0) y = 1; x /= y; }
 static void divq(int &x, int y) { if (y == 0) y = 1; x %= y; }
 static void eq(int &x, int y) { x = y; }
 
-static void and(int &x, int y) { x &= y; }
-static void or(int &x, int y) { x |= y; }
-static void xor(int &x, int y) { x ^= y; }
+static void bit_and(int &x, int y) { x &= y; }
+static void bit_or(int &x, int y) { x |= y; }
+static void bit_xor(int &x, int y) { x ^= y; }
 static void shl(int &x, int y) { x <<= y; }
 static void shr(int &x, int y) { x >>= y; }
 
@@ -94,7 +94,7 @@ struct op_struct {char *Name; OP opf; };
 op_struct arith[] = { {"+",plus}, {"-",minus}, {"*",mult}, 
 		       {"/",divi}, {"%",divq}, {"=",eq} };
 
-op_struct bitops[] = { {"&",and }, {"|",or   }, { "^", xor},
+op_struct bitops[] = { {"&",bit_and }, {"|",bit_or   }, { "^", bit_xor},
 		       {"<<",shl}, {">>",shr} };
 
 class operator_button : public button {

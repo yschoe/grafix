@@ -553,7 +553,7 @@ main_window::main_window(char * WMName, int w, int h,int fix_pos,int x,int y)
 
 // up to now only invoked from window manager upon "close"
 void main_window::ClientMsg_CB(XClientMessageEvent) {
-  if (this == top_main) exit(0); else Unmap();
+  if (this == top_main) _exit(0); else Unmap();
 }
 
 main_window::~main_window() {
@@ -889,7 +889,7 @@ pulldown_button* make_radio_menu(window &parent, char *Name, char **list,
   char * value;
   // first parse blist to determine size of pulldown menu
   compute_text_size(list,wm,nbuttons);
-  wm = 40 >? wm * 6 + 18;   //  6 = width of char
+  wm = MAX(40, wm * 6 + 18);   //  6 = width of char
   hm = nbuttons * 20;       // 20 = height of button
   pulldown_window * pd_wi = new pulldown_window(wm,hm);
   pulldown_button * pd_bt;
@@ -1298,7 +1298,7 @@ void clock_win::draw_interior()  {
   
 void clock_win::init() {
   xc = width/2; yc = height/2; 
-  d = (width <? height) - 2; // minimum of width and height
+  d = MIN(width, height) - 2; // minimum of width and height
   rh = d/3 - 2; rm = d/2 - 4;
   // printf(" %d %d %d %d %d\n",width,height,xc,yc,d);
 }
@@ -1406,6 +1406,10 @@ void scrolled_window::cbhook(twodim_input *ts) {
   XMoveWindow(display,virt_win->Win,xp,yp);
 }
 
+static void sw_cbhook_wrapper(void *instance, twodim_input *tdi) {
+  ((scrolled_window *)instance)->cbhook(tdi);
+}
+
 void scrolled_window::resize(int w, int h) {
   // if (w == width && h == height) return;
   width = w; height = h;
@@ -1421,13 +1425,13 @@ void scrolled_window::resize(int w, int h) {
   if (vert_scr) {
     int sh = (h-4) * h/hvirt; if (sh < 4) sh = 4; // else too small
     if (vs == 0) // create new 
-      vs = new vertical_shifter(*this,sz,h,w,0,sh, (CBHOOK) &cbhook, this);
+      vs = new vertical_shifter(*this,sz,h,w,0,sh, &sw_cbhook_wrapper, this);
     else vs->configure(sz,h,0,sh,w,0); 
   } else if (vs) XUnmapWindow(display,vs->Win);
   if (horz_scr) {
     int sw = (w-4) * w/wvirt; if (sw < 4) sw = 4; // else too small
     if (hs == 0) // create new 
-      hs = new horizontal_shifter(*this,w,sz,0,h,sw, (CBHOOK) &cbhook,this);
+      hs = new horizontal_shifter(*this,w,sz,0,h,sw, &sw_cbhook_wrapper,this);
     else hs->configure(w,sz,sw,0,0,h); 
   } else if (hs) XUnmapWindow(display,hs->Win);
   

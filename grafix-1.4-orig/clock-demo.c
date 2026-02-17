@@ -6,10 +6,10 @@
 #include "window.h"
 #include <sys/types.h>
 #include <sys/time.h>
+#include <time.h>
 
 clock_win *clck1, *clck2;
 
-extern "C" void sleep(int);
 int ticker1 = 0, ticker2;
 
 class clock_main_window : public main_window {

@@ -34,10 +34,10 @@ protected:
 
   void xline(XPoint a, XPoint b, int lastp) { 
     if (opaque) cline(a,b, lastp);  else pline(a,b); }
-  struct XPoint screen_project(float x, float y, float z);
+  XPoint screen_project(float x, float y, float z);
 
 public:
-  struct XPoint *scptr; // array of transformed grid points as  [nx][ny] 
+  XPoint *scptr; // array of transformed grid points as  [nx][ny] 
   int ixstart,iystart,// the start indicees for the representation from qq-array
       ixend, iyend;
   int xspan, yspan;  // the max values of x,y in org.

@@ -99,7 +99,7 @@ void lattice_window::fill(XPoint a, XPoint b, int lastp, int dofill) {
 }
 
 // new gcc C++ extension : named return values (not in class definition)
-struct XPoint lattice_window::screen_project(float x, float y, float z) {
+XPoint lattice_window::screen_project(float x, float y, float z) {
   float xs,ys,yss,zss,t,dx,dy; 
   // printf(" %f %f %f \n",x,y,z);
   dx = x - xp; dy = y - yp;
@@ -164,7 +164,7 @@ void lattice_window::make_body(int nx, int ny, float *FF,
   if (scptr) delete[] scptr; 
   scptr = new XPoint[nx*ny]; 
   // all  nx*ny grid-points after trafo, addressed as scp[nx][ny]
-  struct XPoint (*scp)[ny] = (XPoint (*) [ny]) scptr; 
+  XPoint (*scp)[ny] = (XPoint (*) [ny]) scptr; 
   znorm = gamma * xmax;
   for (ix = ixstart, xh = .0; ix < ixend; ix++, xh += 1.0) { 
     for (iy = iystart, yh = .0; iy < iyend; iy++, yh += 1.0 ) {

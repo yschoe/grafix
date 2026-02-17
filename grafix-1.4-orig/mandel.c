@@ -2,15 +2,17 @@
 // wolf 1/97
 
 #include "window.h"
+#include <complex>
 #undef Complex
-#include <Complex.h>
 
 #define ITMAX 255
+
+typedef std::complex<double> Complex;
 
 inline int iterate(Complex& c) {
   int it = 0;
   Complex z = 0;
-  do { z = z*z + c  ; if (++it == ITMAX) break; } while (norm(z) < 1e4);
+  do { z = z*z + c  ; if (++it == ITMAX) break; } while (std::norm(z) < 1e4);
   return it;
 }
 
@@ -79,5 +81,3 @@ main() {
   main_window *mw = newman(-2,0.5,-1,1,True);    
   mw->main_loop();
 }
-
-

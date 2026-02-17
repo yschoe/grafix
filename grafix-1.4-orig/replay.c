@@ -153,10 +153,10 @@ int main(int argc, char *argv[]) {
   // printf("new replayer %s %x %d\n", name, animp, itime);
   replayer *rep = new replayer(animp, argv[0], top_proc);
   menu_bar *mb = rep->mb; 
-  new instance_button <play_main> (*mb," spawn ",rep->spawn,rep);
+  new instance_button <play_main> (*mb," spawn ",&play_main::spawn,rep);
   if (top_proc) { // only the top process gets these buttons
-    new instance_button <replayer>(*mb," file ",rep->load_file,rep);
-    new instance_button <replayer> (*mb,"synchron",rep->start_command,rep);
+    new instance_button <replayer>(*mb," file ",&replayer::load_file,rep);
+    new instance_button <replayer> (*mb,"synchron",&replayer::start_command,rep);
     new help_button (*mb," help ",replay_help);
     new quit_button(*mb);
   } else {
@@ -166,4 +166,3 @@ int main(int argc, char *argv[]) {
   rep->main_loop();
   rep->cleanup();
 }
-

@@ -50,7 +50,7 @@ public:
     unmapped = True;
   } 
   void toggle() { // toggle between mappd/unmapped state
-    int y = (13*ent + 6 <? height); // 13 = font height
+    int y = MIN(13*ent + 6, height); // 13 = font height
     if (y < height) resize(width, y); // -> make window as small as needed
     if (unmapped) RealizeChildren(); else Unmap();
     unmapped = ! unmapped;

@@ -4,12 +4,13 @@
 
 #include <stdio.h>
 #include "window.h"
+#include <complex>
+#undef Complex
 
 #define MAP_DATA_SCALE (30000)
 extern short map_data[]; // the data
 
-#undef Complex // this is defined in the Xlib (included by window.h) !! 
-#include <Complex.h>
+typedef std::complex<double> Complex;
 
 double grd2rad = 180./M_PI;
 extern int button_fg_pix; // from window.c
@@ -183,7 +184,7 @@ public:
     csp = cos(phi); ssp = sin(phi);
     cst = cos(theta); sst = sin(theta);
     int nx; // nx = 1 : use all points, 2 = every 2nd,...
-    nx = 1 >? irint(scale*2000/width); // d ~= 25km ~= 1/4grd ~= 1/300 
+    nx = MAX(1, irint(scale*2000/width)); // d ~= 25km ~= 1/4grd ~= 1/300 
     // printf("%d %f ",nx, phi); fflush(stdout);
     // Poles
     set_color(button_fg_pix); // a nicer color for coord-lines & ticks

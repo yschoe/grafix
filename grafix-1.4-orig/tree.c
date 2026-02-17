@@ -64,7 +64,7 @@ static int yoff = bhgt + 2; // vertical offset (between buttons)
 Node::Node(char *name) : name(name) {
   depth = 0; descendants = 0; 
   xp = yp = -1; 
-  w  = bwmax <? 6*strlen(name)+6; 
+  w  = MIN(bwmax, int(6*strlen(name)+6)); 
   h  = bhgt;
 }  
 
@@ -127,7 +127,7 @@ int Tree::rec_geometry(int ytop[], Tlist* tcol[], int ypar, int dbmax) {
     Tree *ctemp[nch]; // for sorting children we must use a temp vector
     for (ic = 0; cl; cl = cl->cdr, ic++) ctemp[ic] = cl->car;
     qsort(ctemp, nch, sizeof(void*), (IVPVP) qcomp); // sort with qcomp
-    int y = ypar >? ytop[depth]; yc = 0;
+    int y = MAX(ypar, ytop[depth]); yc = 0;
     for (ic = 0; ic < nch; ic++) { 
       int cyprop = y + (ic - (nch-1)/2)*yoff; // proposed child y
       yc += ctemp[ic]->rec_geometry(ytop, tcol, cyprop, dbmax);
@@ -136,7 +136,7 @@ int Tree::rec_geometry(int ytop[], Tlist* tcol[], int ypar, int dbmax) {
   } 
   // for depths lower dbmax use child mean, else parent value
   if (depth < dbmax) yp = yc; else yp = ypar; 
-  yp = yp >? ytop[depth]; // make sure no overlapping takes place
+  yp = MAX(yp, ytop[depth]); // make sure no overlapping takes place
   xp = 5 + (bwmax+5)*depth;
   ytop[depth] = yp + yoff; 
   return yp;
@@ -179,8 +179,8 @@ int Tree::rec_insert(Tlist *tcol[], int &vheight, int &vwidth) {
   if (cp2) cp2->cdr = cnew; else tcol[depth] = cnew;
   
   yp = yopt;  xp = 5 + (bwmax+5)*depth;
-  vheight = vheight >? yp+yoff;
-  vwidth = vwidth >? xp+bwmax;
+  vheight = MAX(vheight, yp+yoff);
+  vwidth = MAX(vwidth, xp+bwmax);
   return yp;
 }
 
@@ -277,10 +277,9 @@ void Tree_main::make_tree(Tree *top) {
   vheight = 0; 
   yroot = top->rec_geometry(ytop,tcol,0,dbmax);
   vwidth = bwmax*d + 10; vheight = 0;  
-  for (d = 0; d < dtot; d++) vheight = vheight >? ytop[d]; 
+  for (d = 0; d < dtot; d++) vheight = MAX(vheight, ytop[d]); 
  
   vheight += 2; 
   // printf("%d %d\n",vwidth,vheight);
   // for (Tlist *tl= tcol[2]; tl; tl= tl->cdr) printf("%s\n",tl->car->name);
 }
-
