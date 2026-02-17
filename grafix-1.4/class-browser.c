@@ -137,8 +137,10 @@ public:
   }
   char *Text(int pos = 0) { return buf+pos; }
   char *Line(int pos) { // search linestart *before* pos 
-    char *cp = buf+pos;
-    while (*cp != '\n' && cp-- > buf);
+    if (pos <= 0) return buf;
+    char *cp = buf + pos;
+    if (cp > buf + length) cp = buf + length;
+    while (cp > buf && cp[-1] != '\n') cp--;
     return cp;
   }
   int Length() { return length; }
@@ -215,12 +217,12 @@ public:
       char* string = Identifier(beg);
     
       if (string == nil || beg >= delim) {
-	delete string;
+	delete [] string;
 	beg = delim;
 	return nil;
       
       } else if (KeyWord(string)) {
-	delete string;
+	delete [] string;
 	string = nil;
 	
       } else return string;
@@ -396,7 +398,7 @@ void parse_file(Clist* &allcl, char *fina) {
   printf("file %s (%d byte)",fina,bufsize);
   FILE *f = fopen(fina,"r"); if (f == 0) return; 
 
-  char *buf = new char[bufsize]; // the buffer for ClassBuffer
+  char *buf = new char[bufsize + 1]; // +1 for terminating zero
   if (buf == 0) error("no space for textbuffer");
   int c, n = 0;
   while ((c = fgetc(f)) != EOF) buf[n++] = c;
@@ -405,24 +407,28 @@ void parse_file(Clist* &allcl, char *fina) {
   ClassBuffer *tb = new ClassBuffer(buf);
   int nc = tb->SearchTextBuffer(allcl,fina);
   printf(" has %d class definitions\n",nc);
-  if (nc == 0) { delete tb; delete buf; } // not needed
+  if (nc == 0) { delete tb; delete [] buf; } // not needed
   fclose(f);
 }
 
 void parse_directory(Clist* &allcl, char *path) {
   printf("reading directory %s\n",path);
   DIR *dirp = opendir(path);
+  if (dirp == 0) return;
   struct dirent *dp; 
   for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) { 
     int length = strlen(dp->d_name);
-    if (dp->d_name[length-1] != '.') { // not for . or .. file
-      int plen = strlen(path); 
-      if (path[plen-1] == '/') path[plen-1] = 0; // eliminate tail-slashes
-      char *fina = new char[length+strlen(path)+2];
-      sprintf(fina,"%s/%s",path,dp->d_name);
-      parse_file(allcl,fina);
-    }
+    if (length == 0) continue;
+    if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) continue;
+    int plen = strlen(path);
+    int has_trailing_slash = (plen > 0 && path[plen-1] == '/');
+    char *fina = new char[length + plen + 2];
+    if (has_trailing_slash) sprintf(fina,"%s%s",path,dp->d_name);
+    else sprintf(fina,"%s/%s",path,dp->d_name);
+    parse_file(allcl,fina);
+    delete [] fina;
   }
+  closedir(dirp);
 }
 
 // output of all found classes with children and parents on stdout

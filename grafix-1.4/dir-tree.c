@@ -27,25 +27,39 @@ public:
   main_window(name,ww,wh,1,x,y) {
     int nc = 0; // should be the length of text !!
     DIR *dirp = opendir(path);
-    // if (dirp == 0)  printf("can't open %s\n",path);
+    entries[0] = 0;
+    if (dirp == 0) {
+      snprintf(entries, sizeof(entries), "cannot open directory: %s\n", path);
+      new text_viewer(*this,ww,wh,0,0,entries,nc);
+      unmapped = True;
+      return;
+    }
     struct dirent *dp; 
-    ent = 0; char *ep = entries+1; // why +1 ?????
+    ent = 0; char *ep = entries;
+    size_t remain = sizeof(entries);
     for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) {
       int length = strlen(dp->d_name);
+      if (length == 0) continue;
       if (dp->d_name[length-1] == '.') continue; 
       // if last char == . not display it ( . or .. )
       char *fina = new char[length+strlen(path)+2];
       sprintf(fina,"%s/%s",path,dp->d_name); // complete path
       struct stat st;
       if (!lstat(fina, &st)) {
-	// boundary check for ep should take place
-	sprintf(ep,"%8ld %-20s\n",st.st_size,dp->d_name);
-	// on stupid SUNs sprintf returns char* instead of int (char count)!!!
-	// so ep += sprintf(..) does not work there
-	while (*ep) ep++; // get position of string end;
+	int wrote = snprintf(ep, remain, "%8ld %-20s\n", st.st_size, dp->d_name);
+	if (wrote < 0 || (size_t)wrote >= remain) {
+	  // keep trailing zero and stop appending on overflow
+	  entries[sizeof(entries)-1] = 0;
+	  delete [] fina;
+	  break;
+	}
+	ep += wrote;
+	remain -= wrote;
 	ent++;
       }
+      delete [] fina;
     }
+    closedir(dirp);
     new text_viewer(*this,ww,wh,0,0,entries,nc); 
     unmapped = True;
   } 
@@ -93,27 +107,32 @@ public:
 void rec_dir(char *path, DirTree* parent) {
   printf("reading directory %s\n",path);
   DIR *dirp = opendir(path);
-  if (dirp == 0) printf("can't open %s\n",path);
+  if (dirp == 0) {
+    printf("can't open %s\n",path);
+    return;
+  }
   struct dirent *dp; 
   for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) {
     int length = strlen(dp->d_name);
-    if (dp->d_name[length-1] != '.') { // not for . or .. file
-      int plen = strlen(path); 
-      if (path[plen-1] == '/') path[plen-1] = 0; // eliminate tail-slashes
-      char *fina = new char[length+strlen(path)+2];
-      sprintf(fina,"%s/%s",path,dp->d_name); // complete path
-      struct stat st;
-      if (!lstat(fina, &st) && S_ISDIR(st.st_mode)) {
-	// *** problem with symbolic links : how to exclude ???? ***
-	// **********     use 'lstat' instead of 'stat'     ************
-	// ********** !!!! because 'stat' follows the links !!! ********
-	// printf("reading directory %s %o\n",fina,st.st_mode);
-	char *tail = strrchr(fina,'/'); // eliminate trailing path
-	if (tail == 0) tail = fina; else tail++;
-	DirTree *dt = new DirTree(tail,fina,parent);
-	rec_dir(fina,dt);
-      }
+    if (length == 0) continue;
+    if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) continue;
+    int plen = strlen(path);
+    int has_trailing_slash = (plen > 0 && path[plen-1] == '/');
+    char *fina = new char[length + plen + 2];
+    if (has_trailing_slash) sprintf(fina, "%s%s", path, dp->d_name);
+    else sprintf(fina, "%s/%s", path, dp->d_name);
+    struct stat st;
+    if (!lstat(fina, &st) && S_ISDIR(st.st_mode)) {
+      // *** problem with symbolic links : how to exclude ???? ***
+      // **********     use 'lstat' instead of 'stat'     ************
+      // ********** !!!! because 'stat' follows the links !!! ********
+      // printf("reading directory %s %o\n",fina,st.st_mode);
+      char *tail = strrchr(fina,'/'); // eliminate trailing path
+      if (tail == 0) tail = fina; else tail++;
+      DirTree *dt = new DirTree(tail,fina,parent);
+      rec_dir(fina,dt);
     }
+    delete [] fina;
   }
   closedir(dirp);
 }
