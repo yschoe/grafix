@@ -1,0 +1,379 @@
+15.12. posting package to comp.sources.misc
+  saved in grafix/post-15.12
+
+added scrolling with keys : PgUp/Dn arrow-up/down to file selection box
+  -> files.c
+
+16.12 : cleanup event mask setting; default selection_mask for the window
+class is only Expose and Configure, derived classes add masks by demand ->
+less events, more transparency
+-> window.c
+
+17.12 - 19.12:
+
+calc.c - name conflict for Solaris (div-> divi) resolved
+files.c - extended for complete viewing of texts
+         new classes :vert_scrollbar, text_window, text_viewer 
+(files-demo.c) - deleted , replaced by :
+file-browser.c - demo for file viewer with spawning and loading new files, 
+	also with file_selection_box
+files.c - file_selection box extended :
+	now has scrollbars for directory and file selector with standard 
+	3-button interface (button 1/3 = pgup/dn, button 2 = draw/set)
+	also key-events : next,prior, arrow-keys
+	button-1-press (in selector) -> select file/directory
+
+window.h - constructor delete_button for menu_bar parent def.
+lat_win.c - added z-axes ticks
+
+23.1:
+window.c - bug with WatchCursor fixed : it didn't vanish when other main
+	windows were spawned. (there was only one global pointer "watch_main")
+	New solution : no more restore in event loop, but explicitely
+	to call ResetCursor(); after computation
+	corrections : window.h, lat_man.c, one-dim, two-dim
+lattice: floating point prints (ticks, gamma) %f -> %g for better
+	readability
+
+20.2.
+grafix.mk : HOSTTYPE (nonportable) replaced by uname (portable)
+lat_win.c : z-ticks also for small heights (ntick > 0)
+
+
+27.2
+Makefile : make depend introduced (File .depend) by help of Ulrich Lauther
+
+Weird behaviour on "Close" via window manager resolved. If it was done 
+for a child then the whole program crashed with :
+   XIO:  fatal IO error 32 (Broken pipe) on X server ":0.0"
+      after 626 requests (622 known processed) with 0 events remaining.
+      The connection was probably broken by a server shutdown or KillClient
+
+   explanation (see mwm.1)
+
+     f.kill
+          This function is used to terminate a  client.   If  the
+          WM_DELETE_WINDOW protocol is set up, the client is sent
+          a client message event, indicating that the client win-
+          dow  should be deleted.  If the WM_SAVE_YOURSELF proto-
+          col is set up and the WM_DELETE_WINDOW protocol is  not
+          set  up,  the  client  is  sent a client message event,
+          indicating that the client needs to prepare to be  ter-
+          minated.    If   the   client   does   not   have   the
+          WM_DELETE_WINDOW or WM_SAVE_YOURSELF protocol  set  up,
+          this function causes a client's X connection to be ter-
+          minated  (usually  resulting  in  termination  of   the
+          client).   Refer  to the description of the quitTimeout
+          resource and the WM_PROTOCOLS property.
+solution: 
+  XSetWMProtocols WM_DELETE_WINDOW for all main_windows;
+  a global top_main is declared (which is always the first created main_window)
+  and a event_handler main_window::ClientMsg_CB defined to handle these ev
+
+9.6.
+scrollbars (even pure_scrollbars) get a member nticks, (which is 0 by default)
+and determines the number of tick lines to display on x-the axis
+changes in window.h, window.c
+
+21.6.
+clock_win : in window.c/h added. A class to display a simple analogue clock
+also a demo clock_demo.c written.
+
+23.6.
+main_window - constructor allows argument fix_pos = 2 : map at center of the screen
+
+30.6.
+palette.c : handler for error "no more color cells" changed; now only warning
+ 	so more than 2 lattice applications can run at the same time on one 
+	display
+
+12.7
+animator and replay included in grafix (from dymos) 
+	replay as a demo, video files are in subdirectory video
+
+19.7
+window.c,h: bug fixed : close button of window manager used to kill the appl.
+	main_window class : XSetWMProtocols added, and
+	event handler for ClientMessage to unmap or exit. 
+	To find the top main_window the variable top_main is used. 
+	For this the close button invokes exit, else only unmap
+	(Does not work properly if an marginal window created as first mw) 
+
+26.7. lattice.* : z0 - as shift value introduced, also as managed value
+	
+4.8.
+three-dim.c (and wave.c as ex.) the prototype for any interactive integration 
+	program, simplified interface : integrator class (s.below)
+animator.*, replay.c : extended with new classes : 
+	time_lat, play_lat, play_main, player, integrator
+
+8.8.
+lattice.* : the value display window (display_cursor) is now defined as
+	a main window -> no more clipping. It now follows the pointer directly
+	-> search the nearest lattice point in 3-dim !
+	
+lat_win.c : function "make_lattice" replaced by generalization of "make_body"
+	now the value display works for all types of displays, since scp
+	is always correct !
+
+28.8.
+polling mode changed : now polling_handler is a virtual function in main_window
+	and polling_mode is member -> changes in window.*, clock-demo, animator.*
+	simplified !
+
+1.9. 
+replay.c : synchronization from child to parent fixed (with signals)
+	Now the child process can also be ended, and a new video file can
+	be loaded.
+
+28.9.
+switch_button : introduced in window.h/c
+
+2.10.
+scrollbar : error fixed with move & callback mechanism, since the callback was 
+	invoked with actual slider pos (in pixels) this lead to rounding errors
+	now : extra methods "move" and "move_cb" are defined. On mouse positioning
+	move_cb is invoked, otherwise from "change" -> move and callbck_val 
+
+tick_scrollbar & play_scrollbar included in window.c/h
+
+20.10
+new classes in window.c/h:
+==========================
+scrolled_window : a window with virtual size that can be moved with
+	scrollbars if it is larger than the actual window. Proper resizing !
+
+twodim_input : a twodimensional "scrollbar" to get user input from mouse
+	derived from that : 
+horizontal_shifter, vertical_shifter : are needed by scrolled_window
+
+demo for these : scrolled_demo, class_browser 
+
+26.10. 
+files : text_viewer fixed, tabs, scrolling
+tree graphics
+=============
+class_browser: nearly completed, failures if graph contains unbalancable 
+"cycles"
+	eg        class1
+	         /    |
+	        c2    |    
+	         \    |
+	          class3
+	and insertion sometimes failes ( /fgrab/ )
+27.10.
+tree.c/tree.h separated 
+dir-tree.c : new simple demo for the use of tree classes, should
+	serve as learning model
+
+29.10.
+one-dim/two-dim : new "run" button included to match newer apps.
+
+30.10.
+gccinc : subdirectory for gcc-lib include files that are needed for 
+	regexp parsing (class-browser), 
+	which are not on all systems installed (Sun)
+	will be included in the tar file
+window.c/h : irint and sincos for Suns replaced by simple standards
+	because older SunOS seem to don't have them 
+
+31.10.
+calc.c : keyboard input of numbers and arith. operators -> new
+
+german clean : win-demo.c, edit-demo.c, one-dim.c, two-dim.c, window.h (sigh !)
+  	window.c (sigh !)
+
+edit_window : cursor works now correct in all color modes (8bpp, 16bpp)
+
+1.11.
+window.c : destructors cleaned up, now also the entry in parents child list is
+	correctly removed -> also static windows can be defined and deleted !!
+	Whow !!
+	
+palette.c : TrueColor mode now supported for >= 16bpp !! 
+	minor drawback: if the palette changes, it is not visible for
+	lattice windows immediately, but only when next draw occurs
+
+
+3.11.
+german clean : lattice.h lat_win.c lat_man.c reg_man.c (also help page)
+	-> it should be complete now !!
+
+replay : help text (help button) included
+
+class-browser : error fixed (undefined classes -> path == 0)
+
+4.11.
+popup buttons : new feature : on second press unmap the popup 
+	(also help_button -> now a subclass of popup_button) 
+
+error in three-dim fixed : difficult to find : in animator.c was a erroneous
+	allocation with "char(200)" (wrong brackets) which resulted in 
+	subsequent failures of simple "new char[8]" (but correct ones!)
+
+======================================================================
+
+4.11.95 19:07 version 1.2 uploaded to sunsite, LSM entry mailed, announce posted
+
+====================================================================
+6.11.
+animator : class replayer gets a rotate button and so "three-dim" and "replay"
+	have this option, help text added
+	polling_handler -> step_handler
+
+window.h:  irint macro does not use rint anymore -> HP error
+
+7.11.
+window.c : hash table for mapping X-IDs to window pointers implemented
+	-> now there is no more limit of the number of windows and they
+	may be constructed and deleted in any fashion !!!
+
+11.11.
+dir-tree.c : now links are not further parsed (it gave horrible trees)
+	(problem was to use lstat instead of stat)
+	action on BPress : display directory contents in a popup window
+
+=======================================================================
+
+... ????
+
+24.11.96 
+
+lattice: isoline mode implemented
+
+window.h/c : basic colors Red,Green,Blue,Yellow,Violet defined
+
+26.11.
+
+window.h/c : scrollbar variables changed from int -> float
+	     better fit for numerical applications
+
+8.12.
+window.ch : virtual resize method for coord_window implemented,
+	    now scaling factors are automatically adapted
+ 
+15.12.
+window.ch : radio_buttons are derived from toggle_buttons, they have now
+	    attached an marker that shows which value is active.
+	    Initialization is not quite good yet (default -1 : no value)
+	    If a value is given, it should be inizialized automatically
+
+17.12.
+animator : buttons >> and || unified to one switch_button (for similarity)
+
+24.12.-27.12
+tree.c : error cleaned with virtual height (showed in class-browser, dir-tree)
+	 yc in rec_geometry was not initialized !
+	 * "lin_tree" is build in Tree constructor -> hide from application
+	   declared in tree.h, dir-tree is simpler now
+         constructor for Tree : if parent given : update its child-list
+
+28.12 
+files.ch : * cofirm_box no more static -> caused errors sometimes
+           * new interface function :
+             int yes_no_box(char *title, char **text, int w=200, int h = 120);
+	   * in 'open_file_interactive' static definitions changed to stack
+	     eg : 'static file_selection_box fsb';
+	     caused errors in desctructors ???!!
+
+31.12.
+tree.ch :  color_button : virtual void bpress(XButtonEvent*) { }
+	   to catch all mouse buttons in Node::Press_cb(XButtonEvent*)
+
+4.1.97:
+window.c : * error(char *fmt, ...) now takes args like printf -> simpler to use
+           * PlaceText : XSetFont(...fixed_fn) is reset after Drawing
+ 
+	 
+10.1. 
+files.h, lattice.h : #ifndef .... #endif wraps  
+window.ch : "printw" like printf in windows implemented with variable args
+
+15.1.
+files.ch : class definitions moved from c->h to enable other applications
+font-selector.ch : defines a window for interactive selection of Xfonts
+font-browser: new demo : browse through all Xfonts !
+
+25.1
+mandel.c : new demo for Mandelbrot set
+
+14.3.
+bug-fix: sometimes wrong font used at start (not fixed)
+  in init_globals added :
+  XSetFont(display, gc_copy, fixed_fn->fid); // default font 
+
+17.3.
+Email from sunsite : 
+At about Mar 16, 1997 16:28:51 EST, I made `keeper' move the following files
+from X11/devel to X11/devel/c++libs:
+
+grafix.1.2.README        (no description)
+grafix.1.2.tgz           C++ library for writing X programs
+grafix.1.2.tgz.lsm       (no description)
+
+Thank you for your contribution of time, effort, and creativity.
+--
+			esr (sunsite co-maintainer)
+
+28.4.
+earth.c : great new demo for rotating earth, very nice !! 
+mapdata.c - data for earth (adopted from the xearth demo)
+	the remarkable for this demo is its animation speed, since the 
+	projection is always computed, not stored as video !
+
+6.6.
+palette.c: minor bug fixed: 
+	if not enough color cells it did not set scrollbars (return -> break)
+
+16.6. 
+window.ch : minor bugfix: "set_color" takes unsigned long as arg
+
+21.6.
+palette.ch : constructor for palette_popup has optional argument palstr*
+	for initialization 
+
+7.7.
+Makefile : tgz file is now expanded to grafix1.4 subdirectory
+tree.c : gcc warnings eliminated
+
+=============================================================================
+7.7.97 : version 1.4
+uploading to sunsite:
+
+file HOW.TO.SUBMIT:
+NOTE: DON'T UPLOAD TO /pub/Linux/Incoming ANYMORE! IT WILL NO LONGER WORK!
+And uploading pirated commercial software won't help anybody.  We delete it.
+
+To submit Linux stuff to sunsite, do this:
+
+   1) Get LSM-TEMPLATE from /pub/Linux/Incoming
+   2) Fill out the lsm entry as described
+   3) Upload your files and a .lsm file containing an lsm entry
+      to  /incoming/Linux (note: uploading to pub/Linux/Incoming
+      is no longer permitted).
+
+Step 3 is no longer optional. The archive has gotten too large to
+maintain by hand, and our helper tools depend on LSM information.
+Anything you submit without an LSM will be rejected; you'll get an
+email form letter about it if we can figure out who you are without
+too much effort.
+
+When you name your upload files, please pay attention to the guidelines
+for naming things in the file NAMES.  Also, please try to use one of the
+standard Copying-Policy fields from LICENSES.  Doing these things will
+make the maintainers' lives easier (remember, they're all overworked
+volunteers!).  This will get your software processed faster.  It will make
+you wiser, stronger, sexier, brighten your teeth, and improve your karma.
+And it's the right thing to do!
+
+-------------------------------------------------------------------------
+
+* upload tgz and lsm to sunsite:/incoming (or /incoming/Linux)
+  Note : all files in /incoming not readable !! (nor deletable)
+* send email lsm@osf-alpha.cs.helsinki.fi
+  with the subject "add" and the entry in the body (one entry per message).
+  All other subjects cause this automatic message to be sent.
+  The LSM database and robot are maintained by Lars Wirzenius (liw@iki.fi).
+* announce in comp.os.linux.announce : 
+  Send submissions for comp.os.linux.announce to: linux-announce@news.ornl.gov
+==============================================================================

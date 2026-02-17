@@ -1,0 +1,199 @@
+
+1. Q: I can't figure out the use of PlaceText/DrawString and Line - 
+  It seems to me that if I want to draw a horizontal red line in the 
+  main window, I could:
+
+  main_window *mw=new main_window("Hello",300,300);
+  setcolor(alloc_named_color("red"));
+  mw->Line(10,10,290,10);
+
+  but it doesn't work that way... how do I use placetext/drawstring/line?
+ 
+A: Indeed, drawing does not work like you wrote. Well, it's quite the *default*
+question about Grafix.
+
+For drawing into a window you have to :
+1. define a subclass of "window" (or some other window class)
+2. overload its "redraw" method by a specific function that does the
+   desired drawing
+3. create an instance of this new class as subwindow in your main_window.
+4. invoke the main_loop to catch the X-events
+
+eg. see "win-demo.c" :
+....
+// ** 1. define "my_window" as derived class of window
+class my_window : public window {
+public: my_window(window & parent, int w, int h, int x, int y) :
+  window(parent,w,h,x,y) {}
+  virtual void redraw() { // ** 2. virtual fn replaces window::redraw
+    int y;                //        and does the actual drawing
+    for (y=0; y < height ; y+= 3) line(0, y, width, y);
+  }
+};
+....
+main(int argc, char *argv[]) {
+  main_window *mainw = new main_window(argv[0], 300, 300);  // Main Window
+.... -- other definititons --
+  new my_window(*mainw, 60, 60, 110, 0); // ** 3. create an instance
+  mainw->main_loop();                    // ** 4. invoke X-event-loop
+}
+/******************************************************/
+
+This seems quite complicated at a first glance, however, if you understand
+a little bit more about X-window you will see that only this approach will work
+with it.
+
+BTW. this is also explained in HOWTO.txt :-)
+--------------------------------------------------
+
+2. Q:
+ > 	I am having trouble compiling your demos.  I get the message
+ > cannot open -lX11.  Also, I can't find any installation instructions.  
+ > Can you help me?
+
+
+A: You probably have an unusual path for your Xlib. Try to find the file
+libX11.a on your system. It shoulb be located somewhere under 
+"/usr/X11/lib...", "/usr/X11R6/lib" or similiar. 
+Then add the path ( without the last "/lib") to the XPATH-macro in the 
+file "grafix.mk" eg :
+
+ifeq ($(shell uname),Linux)
+XPATH = /usr/X11R6
+LFLAGS = -L$(XPATH)/lib
+endif
+
+and then make again.
+
+The second possibility is you haven't installed Xlib on your system yet.
+
+3. Q:
+I'm trying grafix1.2 under linux (g++ 2.5.8).   The previous version
+worked perfectly.   With the new version, make depend works, but make
+gives...
+
+window.c: In method `void scrolled_window::resize(int, int)':
+window.c:1292: cannot convert to a pointer type
+window.c:1298: cannot convert to a pointer type
+make: *** [window.o] Error 1
+
+Can you help please?
+
+A: I would recommend installing a new gcc version. I use 2.6.3 and 2.7.0 which
+work well. 2.5.8 has some flaws.
+To solve your problem quickly try the following : change
+      vs = new vertical_shifter(*this,sz,h,w,0,sh, (CBHOOK) cbhook, this);
+to
+      vs = new vertical_shifter(*this,sz,h,w,0,sh, (CBHOOK) &cbhook, this);
+							    ^
+and the same modification in line 1298.
+
+---------------------------------------------------------------------------
+4. Q: 
+Question for you - Here's my situation:
+
+1. I have a window that contains 10 buttons.
+2. I want to destroy this window, reopen it with the same handle, a
+   and then put in 10 *different* buttons, and i want this to happen when 
+    the user presses a completely different button in another part of 
+   the main window.
+3.  Here's how I'm doing it:
+	'aux' is the handle to the window, as a child of the main window.
+        the buttons are put in with a simple 'new function_button(*aux...)'
+      	When the user presses the activation button to move to the next 
+	'page', I do this:
+	aux->UnMap();
+	delete aux;
+	Now I want to bring the window back in the same place, so I call the
+	same "aux=new window(...)" that I did when I *first* set it up.
+	I have to now call aux->Map() (not sure why) to make the window 
+	exist.  Then I try putting in buttons the same way as before :
+		new function_button(*aux ...)
+	but they never appear.  
+
+
+Any hints?
+
+A:
+First, you must keep in mind that using the same handler 'aux' for the new 
+window does not make any connection between the two windows. 
+It's simply a pointer variable that is set to another value.
+
+Second, to make a new window appear on the screen together with its child 
+windows you have to use 'RealizeChildren' after they all are created.
+
+Ie, the following statements should be used:
+   aux = new window(...); 
+   new button(*aux,....); // some child windows of aux
+    ...
+   aux->RealizeChildren();
+
+--------------------------------------------------------------------------
+5. Q: 
+class-browser says 'graph contains cycles' and crashes. Any ideas?
+
+A: 
+The "cycles" problem in the class-browser occurs if you have a quite complex
+inheritance graph. It is only a methodical problem to display these graphs, and
+I hope to solve it the next release.
+
+The problem arises e.g. when you have the following class inheritance :
+
+         Superclass
+            ^  ^
+           /   |
+       Class2  |
+          ^    |
+           \   |
+           Class3
+
+Then it is not possible to compute an unique "depth" value which is needed
+by the used method.
+
+6. Q:
+at which sites can I found the new version of grafix ?
+
+A:
+Usually, all mirrors of sunsite should have grafix in a subdirectory
+ /pub/Linux/X11/devel/c++libs or similiar.
+A recent short archie inquiery showed the following list of ftp servers :
+
+sites with grafix.1.2.tgz :
+
+primary site
+============
+sunsite.unc.edu /pub/Linux/X11/devel/c++libs (or /incoming)
+
+found on archie : host archie.funet.fi :
+========================================
+ftp.warwick.ac.uk /pub/linux/sunsite.unc-mirror/X11/devel
+
+ftp.ms.mff.cuni.cz /MIRRORS/ftp.ibp.fr/linux/distributions/jurix/source/X11/libs
+		   /MIRRORS/sunsite.unc.edu/Linux/X11/devel
+		   /OS/Linux/distributions/jurix/source/X11/libs
+
+ftp.vse.cz         /pub/386-unix/linux/X11/devel
+
+romeo-klive.nvg.unit.no /pub/linux/sunsite/X11/devel
+
+sunsite.doc.ic.ac.uk /computing/operating-systems/Linux/sunsite.unc-mirror/X11/devel
+
+found on other archies :
+========================
+parnas.mimuw.edu.pl /linux/X11/devel
+
+from archie.univie.ac.at :
+ftp.cc.duth.gr  /pub/unix/Linux/sunsite/X11/devel
+ftp.ibp.fr      /pub3/linux/sunsite/X11/devel
+		/pub2/linux/distributions/jurix/source/X11/libs
+ftp.kfki.hu  	/pub/linux/X11/devel
+ftp.loria.fr	/pub/linux/sunsite/X11/devel
+ftp.switch.ch	/mirror/linux/sunsite/X11/devel
+ftp.univie.ac.at 	/systems/linux/sunsite/X11/devel
+sunsite.icm.edu.pl	/pub2/linux/X11/devel
+
+old versions :
+=============
+ /archive/comp/sources/misc/volume46/grafix
+
+----------------------------------------------------------------------------

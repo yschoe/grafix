@@ -1,0 +1,653 @@
+					Grafix, Vers. 1.2, 1995, Oct. 30
+0. General Remarks
+==================
+The Grafix package is far from beeing complete and surely not bug free.
+Several features are of rudimentary functionality but I hope
+to improve them step by step. (It depends upon how much time I can afford
+for this task). Nevertheless, the basic structure of the system can be
+considered as unchanging.
+
+Beta testers and bug reports are wellcome, also improvement suggestions.
+However, I cannot make ports to other platforms. If a user intends to do
+this I will offer my support.
+Feel free to ask me if you have problems, questions about any part of the
+system.
+This text "HOWTO" is also not yet complete. As with the whole package it
+will be completed step by step.
+
+My Email address is :
+                          wolf@first.gmd.de
+			  wolfk@gfz-potsdam.de
+  
+1. Demonstration Programs
+=========================
+
+The look at the demos in most cases enables a much faster understanding of the
+imbedded connections and functionality of a programming interface than reading
+a manual.
+So the first step should be the installation of the demos and the second trying
+to understand how they work.
+
+For this purpose I have added several demos :
+
+1.1 simple demos
+---------------
+hello.c : the simplest program
+ 
+win-demo.c : shows the working of all basic window functionality; like
+    	main_window, buttons, popups, help-popups, pulldowns, displays, 
+	scrollbars, etc.
+
+calc.c : an implementation of a simple calculator
+        with hex/dec/bin conversion, arithmetic and logic operations
+
+clock.c : implementation of a simple analogue clock
+
+cursors.c : show all predifined X-Cursors
+
+edit-demo.c : usage of "edit_window" for entering strings
+
+file-browser.c: a complete browser which shows the usage of the 
+	"file selection box" class, vertical scrollbars, text view
+
+pal-demo.c : X-window colors palette display and manipulation
+
+dir-tree.c : display directory tree (demo for tree-graphs)
+
+mandel.c : computes and shows the familiar Mandelbrot set, with the option to 
+	select a sub-rectangle for a new window via mouse pointer
+
+font-browser : interctively shows all X-fonts of this server 
+	(selectable with the usual mask) 
+
+1.2. numerical demos
+--------------------
+one-dim.c : a quite realistic example developed for practical use;
+        it shows the use of real coord-systems for displaying real-valued
+    	functions, the use of pulldown menus for selecting values,
+	the animation technique for integrating a differential eq.
+
+lat2demo.c : demonstrates the use of lattice_manager class
+        generates pictures of two functions inside one main window, each having
+   	its own lattice-manager functionality buttons and popups 
+        for manipulating its appearance; only some 40 lines code
+
+lat-demo.c : another demo of the lattice_manager class for displaying
+	two dimensional functions. 
+	It combines the lattice_manager functionality with 2 additional 
+	pulldowns for interactively selecting a function and setting a new
+	grid size. The code needed for this is only some 50 lines.
+
+two-dim.c : a realistic example; shows the use of the lattice_manager class
+	for displaying and animating two dimensional functions (or arrays)
+ 	based on solvers for the two dimensional advection equation.
+	It allows the user to change interactively the grid size, time step
+	value, some parameters of the initial values, the flow direction,
+	the integration method, the number of time steps to integrate, etc.
+
+three-dim.c : a prototype program for linking to any two- or three-dimensional
+	finited difference equation integration program. It enables interactive
+	integration with graphic display of the computed arrays.
+	It makes use of the new animator class, ie. saving of computed fields 
+	in a so-called video file for later reviewing with the "replay" program
+
+replay : replay a saved file of a three-dim run
+
+1.3 useful demos
+----------------
+class-browser : a very nice graphical class browser that reads some C-files
+	extracts the class inheritance graph by parsing the definitions
+	and displays it in a graphical window
+earth : an interactive rotating earth 
+
+2. Making and running the demos
+===============================
+  After unpacking the shell archives you should at first type :
+        "gmake demos"
+  which compiles and links all demo programs together with the archive in
+  the current directory.
+  To get a first glance of the whole thing then type :
+   	"gmake demorun"
+  which invokes all demos consecutively.
+
+  If make fails there are probably some path related problems, eg. the Xlib
+  is not found under the standard path. If this is the case you have to replace
+  the corresponding macros in the file "Makefile" with the proper values for 
+  your system.
+  If the compiler g++ is not to be found on your system, you are in trouble.
+  (see README).
+
+  Note that an X Window server must run on your computer, of 
+  course, and the DISPLAY environment variable must be set. 
+  For users not so famliar with this topic; you have to use
+     	export DISPLAY=`hostname`:0.0 
+  for bash, or 
+     	setenv DISPLAY `hostname`:0.0 
+  for csh or similiar shells.
+  
+  The order of using the demos should be like listed above, since it works up
+  from simple to complex. 
+
+  If the demos do work try all buttons and play with the parameters.
+  The left mouse button activates a button or pulldown, the right button
+  gives a specific help popup for this window (if installed).
+  The optical behaviour of active buttons is Motif-like, ie. they show  their
+  state "up" or "down" with a three-dimensional frame. However, there is 
+  additionally the feature that the "state of activity" of an button is 
+  indicated by "flattening" the frame if the pointer enters it.
+
+  I also recommend using a color display; on black-and-white displays the
+  appearence will be poor.
+
+3. More detailed information about the demos
+============================================
+4. Some basic concepts of Grafix
+================================  
+  * window tree
+  The user should know the basics of the tree structure of windows under X.
+There is one root window that represents the screen. An application can
+create "main windows" (in Grafix of type "main_window") that are children
+of root. Their appearence on the screen is usually managed by the window
+manager. 
+Then it can recursively create subwindows of certain size and at positions
+relative to the parent window .(0,0) is the left upper corner.
+In Grafix the user should not need to interact with X directly but through
+creation of window instances of some class. Each class represents a
+X-window with some specific behaviour. However, the tree structure is the
+same as under X. The behaviour of the class is mainly determined from the
+callbacks attached with it (see below).
+
+  * window classes
+The basic classes defined in window.h are
+window  	as funadamental class for all others
+main_window  	that are defined as having no parent (always root),
+buttons  	to initiate actions if the mouse button is pressed
+		usually not directly used, but to inherit subclasses
+		from which dozens are defined 
+pulldown_window a main_window that is attached to a button. It pops up
+ 		directly under the button. Mainly for making a selection. 
+plate		window with 3 dim appearance (mainly for buttons)
+menu_bar 	to place other windows (mostly buttons) automatically
+scrollbar	to interactively enter a number with a slider
+text_popup	to show text in an popup (eg. a help text)
+pixmap_window 	has a backing store mechanism so it is used for complicated
+		drawings (functions, lattices..)
+coord_window	defines real valued co-ordinates and drawing functions that
+		operate directly on them (world co-ordinates)
+
+  * mapping between X-events to window instances
+
+The main problem in writing an object-oriented X-interface is the 
+interaction between windows and events. Since every window should be 
+represented as an instance of a peculiar class any X-event that is assigned
+to this window should be able to trigger class specific action.
+While the second part of this problem is easily solved with virtual
+functions of C++ the first requires a little trick. 
+In Grafix I use a table which maps the window-IDs that are generated from
+the X-server calls to XCreateWindow() to the this-pointer of the attached  
+window instance.
+
+Since version 1.3 the mechanism has internally changed a lot (but the
+interfacing functions are not affected). Now I use a hash table (implemented
+as vector of lists). The vector index is computed as (WID % tabsize) and
+for each index the list is parsed until the requested WID is found.
+By setting the tabsize to about 100 it is guarateed that each list is kept
+quite short and list parsing doesn't take too long time. (In this case
+you would see a delayed response of mouse actions). However, the tabsize
+can be set to any value. The number of windows is now unlimited.
+
+Upon deleting a window, the list entry is removed to keep the lists short.
+However, it sometimes occures that deleted windows receive X-events.
+(Eg. if the deleting was done from a button press of a button that is part 
+of the deleted window, and the next button release will occur).
+These events are simply ignored, since the search function returns NULL. 
+
+  * basic callbacks mechanism : the main_loop
+
+Any X-application must implement a loop for handling events. In Grafix this
+"main_loop" is a method of "main_window". This means in a typical
+application one creates a main_window instance (surely with some children
+windows) and then before the closing "}" of main it calls "mw->main_loop();".
+
+All the rest (the interactive run) has to be managed inside this call.
+
+Here I will give a short glance how this internally works. 
+(The reading of this paragraph should not be obligate for a normal user) 
+The first statement in this loop is a call to XNextEvent() which queries
+the X-server for the next event in the queue. From the window-ID of the
+event-structure the corresponding instance is computed (this-pointer) and
+the general "CallBack" function is invoked which calls the virtual function
+that is attached to the event type. There a specific event handling takes
+place.   
+Some important event types should be mentioned here :
+Expose
+ButtonPress, 
+KeyPress
+Enter/Leave
+Configure
+All event types have a default virtual handler in the window class which
+can (and will) be modified in inherited classes. 
+
+An application can have more than one main_windows and therefore invoke a
+main_loop for each of them. This is not useful in normal applications
+since they all basically do the same. However, this can be used to temporarily
+define main_windows (on the execution stack, ie. as local object inside a
+function) and then call it's main_loop to prevent the execution to leave
+this function before a certain action is performed. This is used eg. in
+the "confirm_box" and "file_selection_box" class.
+
+  * colors 
+
+The Xlib uses several different modes of color display. Depending on your 
+hardware you can use a subset of these. The usual color modes are :
+
+- TrueColor : with at least 16 bpp (bits per pixel) color depth.
+	it means that you can use all colors (without a palette mechanism)
+	at the same time. Usually with 16bpp you have a color resolution
+	of 565 rgb, ie. 5 bit for red and blue, 6 bit for green 
+	(giving total 65536 enries). The colors
+	that you define with XAllocColor are then rounded to the nearest
+	entry of this table. 
+
+- PseudoColor : usually for 8bpp displays. Here you have only 256 colors
+	that can be displayed at the same time. Therefore a paletting
+	mechanism is used to select the colors you want to see on the screen.
+	But be aware that the palette size is only low 256, which can
+	be easily overflow. Eg. a palette from the lattice-applications
+	uses 100 entries, the window manager needs some 10 for decorations,
+	the button colors need 3 at least, and so do other programs you have
+	running in X.
+	The main advantage of the PseudoColor is, you may recolor a picture
+	immediatly by simply changing the palette (used in the lattice progs) 
+
+5. How to write own applications with Grafix (overview)
+=======================================================
+5.0 "Hello World" example 
+
+Here is the whole code of the well known "Hello World" program with Grafix :
+
+	#include "window.h"
+	main(int argc, char *argv[]) {
+  	  main_window *mw = new main_window(argv[0],200,200);
+  	  text_win *tw = new text_win(*mw,"Hello World !",180,20,10,50);
+  	  button *qb = new quit_button(*mw,100,20,50,150);
+  	  mw->main_loop();
+	}
+
+5.1 general hints, the class "window" 
+
+  * the window class
+
+window is the superclass of all others. Each window keeps a list of its
+children. This list is needed for mapping, resizing, and deleting.
+It is quite easy to reconstruct from this the complete window tree of a
+running application starting with the root window, or for any main_window.
+
+  * some basic methods for the window class
+
+constructor : takes as arguments parent window, width and height (in pixel)
+the relative position on the parent (with resp. to left upper corner = 0,0)
+and the border width. The constructor mainly calls "XCreateSimpleWindow"
+with default parameters, sets the this pointer in the global pointer table
+and  appends itself to the window tree.
+
+  * the window mapping, expose events and the related callbacks
+
+the exposing of a window is the most important event. It is usually the
+first trap a newcomer to X falls in. "Why doesn't the window appear when I
+draw it ?". The reason is that the mapping and drawing has to be done
+(nearly) asynchronuously with other things. Exposing events are triggered
+whenever a part of a window becomes visible. That is the case when it is
+mapped for the first time but also when an obscuring window is removed (from
+the window manager eg.). 
+The normal course in creating a window is as follows:
+At the start of the main loop a "RealizeChildren" is invoked which recursively
+parses the window tree and invoking for each subwindow the function chain
+
+ -> Realize
+    -> XSelectInput
+    -> Map
+        -> draw_interior
+	-> XMapWindow
+
+Here "draw_interior" is a virtual function that serves only as hook for more
+complicated classes (pixmap_window, see below).
+
+Up to this stage nothing is shown on the screen. The actual exposing is
+performed indirectly through the event loop. Upon Map request the X server
+generates an expose event that invokes the Expose_CB callback. This virtual
+function simply calls the "redraw" function.
+
+So the actual drawing has to be done by defining of a new "redraw" function
+for any derived class. This function is invoked every time the window (or
+parts of it) becomes visible.
+
+The redraw function can (and will) be also called directly from other
+functions or callback handlers.
+
+  * pointer and button events
+
+Each X event correspods to a virtual function that is usually a dummy.
+The only exception is the Button Press 3 that serves per default as a help
+button which can popup a help menu for this window.
+For instance the button class uses the events Enter and Leave to show a
+changing appearance and the ButtonPress or ButtonRelease to perform some
+action (ie. a callback)
+
+  * configure and resize events
+
+If the user interactively resizes a main window (with the help of the window
+manager) by drawing the border or edges the X server issues a configure
+event. This event type is managed by the virtual function "resize".
+By default this method enlarges or shrinks all children recursively by the
+same factor. If another behaviour is intended (eg. for buttons and menubars
+this is of course not appropriate) it should be overwritten.
+
+  * drawing methods
+
+These methods can be used to change the interior of a window
+clear
+DrawString
+PlaceText
+line
+DrawPoint
+Usually they draw directly into the X window and thus are to be seen
+immediately. However, they are overwritten in the pixmap_window class (see
+below) 
+
+  * pixmaps 
+
+Pixmaps are used in X-graphics, where a complete redraw for each mapping event 
+is too time consuming. Remember, mappings occur every time, a part of a window
+becomes visible. In these cases, it is better to store the content of the window
+in an X buffer structure called "Pixmap" and copy from it only the rectangle
+which is actually seen freshly (or again) onto the screen. In grafix Pixmaps
+are represented as "pixmap_window" (see below).
+
+  * destructors
+
+The proper handling of deleting windows requires some thoroughness. 
+Firstly, one has to consider that a deletion of any window automatically
+deletes all of its children recursively. This also requires that each window
+instance has to remove its own entry in the parents children list. 
+In this new version this task is solved. 
+This means that destruction of windows is now completely arbitrary. 
+Automatically, the destruction of all created windows is guaranteed since
+they all are descedants of the root_window, which is deleted upon program
+termination. However, if you delete a window beforehands, it will work too.
+Nevertheless, sometimes problems do arise, when windows are to be managed in 
+a second hierarchy (besides their window hierarchy).
+
+Consider the case of the lattice_manager, which is a normal descendant
+of the window class. It has some popup menus for parameter setting.
+Upon deletion of the lattice_manager they also should be deleted from
+within it's destructor, since the whole lattice_manager may be constructed
+dynamically.
+This will lead to seg faults in the case when the root_window destructor
+invokes the deletion process : it also deletes the popups since they are 
+it's children and this may take place *before* the destructor of the 
+lattice_manager is invoked -> crash.
+In such cases the programmer has to insure the proper deletion order.
+(Or, for simplicity, omit the deletion)
+
+The function 'safe_delete' may also be used for main_windows, when the 
+deletion order cannot be controlled easily : it deletes only if the window
+is still a child of the root_window, ie. it still exists.
+
+ * general remarks about callback functions
+
+Let us consider the example of a push button instance which shall invoke
+some action - eg. computing some values and then show the results in some
+windows. The constuctor for a simple callback_button eg. takes as argument a
+void function with no arguments. It is, of course, easy to define for each
+action a function which invokes the intended actions. However, if the
+action refers to a window then this window has to be defined globally (or
+the this pointer) to make it accessible to the callback function.
+ 
+This approach is neither elegant nor does it allow more complex actions.
+(It is used in some examples, nevertheless).
+On the other hand it is not possible to define parameter types that fit to a
+class that will be defined in the future. 
+
+To evade this problem there are defined some button types which allow for
+complicated callback functions (template_button, instance_button,
+function_button, radio_button). For special actions the user has to define
+his own button classes.
+
+5.2 files 
+
+window.h	basic include file, definition of all fundamental classes 
+		also defines some general functions (set color, set GC ..)
+window.c 	corresp. code, 
+lattice.h	include file for lattice_manager classes
+lat_win.c       )
+reg_man.c	)  the sources for these classes
+lat_man.c	)
+libwin.a	an archive which combines all object files
+eventnames.h  	from Xlib for debugging
+icon.h        	the icon image
+palette.h  	include file for palette manipulations
+palette.c   
+files.h		for file selection box
+files.c  
+clock-demo.c 	demo for online clock
+calc.c 		calculator demo
+edit-demo.c     more demos
+pal-demo.c        
+file-browser.c    
+color_table.c          
+win-demo.c
+cursors.c      	show all X cursors
+lat-demo.c     	)
+lat2demo.c      ) demos for the lattice class
+solver.c	)
+one-dim.c	) the one-dim example
+two-dim.c 	)
+smolark.h	) the two-dim example
+smolark.c	)
+
+animator.h	) classes for computing and storing 2/3-dim integrations and 
+animator.c	) replay these "video"-files as animations, 
+three-dim.c	) prototype for interactive 2/3-dim integration 
+three-nxnynz.h
+wave.c		) very simple example : the 3-dim wave eq. integrator
+replay.c	replayer for "video"-files
+*.icon		some icon bitmaps
+tree.h/c	classes for displaying tree graphs
+gccinc		include files for the gcc-lib which possibly are not installed
+		on your platform 
+scrolled_demo.c simple demo for use of scrolled_windows
+
+6. Some details about other basic classes : 
+===========================================
+   main_window	: a direct child of the root window. It is managed by the
+		window manager. It can be connected with an icon (method 
+		set_icon). Each application must have at least one main_window,
+		other main_windows can be used as popup windows.
+		defines a method "main_loop", which must be invoked to start
+		the user interaction. 
+		Specific behaviour can be set by using the "polling_mode"
+		and "polling_handler" method. This way it is possible to 
+		let applications run without user actions (animations a.o.)
+
+   pixmap_window: a window for complex drawings eg. functions, figures, etc. 
+		for which a complete redrawing upon each expose event would
+		be too slow. Drawing actions are performed indirectly into a 
+		pixmap which is mapped from the expose or redraw methods.
+		They have an additional virtual method "draw_interior" that
+		MUST be overwritten by an derived class (it is a pure virtual 
+		function). This method should perform the actual drawing
+		if the window interior (eg. what you want to see).
+ 		For these windows mapping and expose events do not invoke the 
+		redraw method but they copy the pixmap onto the screen.
+		However, explicit (re)displaying of the windows should be done 
+		with the usual "redraw" method.
+		Since pixmap_window is a virtual class, it cannot be 
+		instantiated directly.
+
+   coord_window : derived from pixmap_window with additional functions to 
+		define real co-ordinates and drawing functions that operate
+		in these coordinates. Thus useful for displaying functions as
+		graphs, co-ordinate systems aso. Examples can be found in the
+		one-dim and two-dim demos and the lattice_window class
+
+   menu_bar 	: enables a simpler definition of buttons (autoplacement)
+
+   buttons	: call an action on button press
+
+   system_button: calls "system" with a passed string as argument
+
+   xwd_button 	: makes a window dump with the "xwd" program
+		to get a direct hardcopy with that button define eg. :
+
+                new xwd_button(*mb2,"hardcopy"," | xpr | lpr",this)
+		which will pipe the output of the xwd command directly to the
+		printer (assumed to be "lpr"). The "this" pointer is the window
+		that shall be printed (or any other window).
+
+   pulldown_window  : special main window that is not managed by the WM. It is
+		usually attached to a button and pops up beneath it.
+
+   scrollbars	: window with a slider to enter a numerical value interactively
+
+   edit_window  : allows editing of strings
+
+   text_viewer : a window with scrollbar to visit text buffers
+
+   scrolled_window : has a virtual window which can be shifted with attached 
+		horizontal and vertical shifters (special scrollbars) if the
+		virtual size exceeds its real size. Thus useful for 
+		visualization of large areas.
+		The attached virtual window must be derived from class 
+		virtual_window.
+		See "scrolled_demo.c" for simple demo or "class-browser" and 
+		dir-tree for other demos
+
+   Tree_window : a scrolled window for displaying general tree graphs
+		(directory trees, inheritance graphs, window trees...)
+
+7. the window class tree (simplified)
+=====================================
+  *** run "class-browser *.h" to get it completely ***
+
+  these classes are defined in window.h and lattice.h
+  window
+    main_window
+      pulldown_window
+      text_popup
+    pixmap_window
+      coord_window
+	region_manager (lattice.h)
+        lattice_window     "
+	  lattice_manager  "
+	    time_lat	  (animator.h)
+    text_win
+    menu_bar
+    plate      
+      slider
+      pure_scrollbar
+	scrollbar
+      display_window
+      edit_window
+      button
+	delete_button
+	quit_button
+	help_button
+	callback_button
+	template_button
+	instance_button
+	function_button
+	toggle_button
+	  toggle_redraw_button
+	pulldown_button
+	radio_button
+	popup_button
+	unmap_button
+	system_button
+	xwd_button
+
+  other classes are defined in palette.h lattice.h files.c 
+  Also numerous examples are to be found in the demos.
+
+8. The interactive integration prototype three-dim.c
+====================================================
+Files : animator.*, three-dim.c, three-nxnynz.h, wave.c, replay.c
+
+These classes allow the saving and replaying of time sequences of an finite
+difference integration process. During integration an arbitrary number
+of arrays that are computed are stored in a "video"-file.
+
+three-dim.c serves as a prototype to hook any 2- or 3-dim finite difference
+time integrator (here as example used : "wave.c"). It enables interactive
+integration with online graphic display of the computed arrays. 
+Its interface is very clearly defined (class "integrator") and consists 
+mainly on the definition of three functions (init, step, exit) and the array 
+names to display.
+
+The class integrator implements the graphical interface and the video saving
+feature. The interface enables : stepwise or continuous integration, online
+display modification, stopping, spawning (of new windows to display other 
+arrays), resetting.
+
+The program "replay" allows the replaying of saved video files. Since the
+array descriptors are part of the video file the program is idependant of
+the integration program.
+It enables : continuous and stepwise playing (forward, backward), stopping,
+spawning, reloading (of other files, but only with the same header !!),
+synchronuous spawning (that is starting another program with a different video
+file, which is displayed synchron to the spawner).
+
+8.1. The main classes of animator.h
+-----------------------------------
+  class animator : store time sequences of grid values (nx*ny) in a file 
+	and to enable animated playback of them (program "replay.c")
+  	the arrays are arranged in separate columns, which are connected
+	with menu-buttons for the lattice class
+  class time_lat :  public lattice_manager
+	a lattice manager for display time sequences of arrays
+	with selector menus, clock and spawning feature
+  class play_lat : public time_lat
+ 	a time_lat with animator and action used for replay and integrators
+  class play_main : public main_window
+	a main window with menubar, a play_lat-window and a spawn-method
+	it is bound to an animator, which columns are displayable
+  class player : public play_main
+ 	has a new main_loop for polling, and two handlers to switch
+	between play and stop; to be used as primer window
+	upon playing the pure virtual method "step" is called
+  class integrator : public player
+	general purpose interface to invoke any program that solves time step 
+	integrations, creates an animator (and video file)
+	the members init_solver, step_solver, exit_solver must be defined by 
+	the application (see three-dim.c for use)
+
+8.2. The video file format (see animator.*, replay.c)
+-------------------------------------------------
+it consists of an ASCII-header and an arbitrary number of unformatted data
+records, one for each time step.
+
+header format: 
+- headline (string) to describe the content
+- nx ny ncols : one text-line with grid size (nx,ny) and the number of
+	columns in the menu line
+- for each column : 
+  nitems : number of items in the menu (see below)
+  for each item :
+     	name string (terminated with NL)
+	gamma z0 : two formatted reals, (norm factor, z-shift for display)
+
+record format:
+all data are unformatted
+- 1 int = integration time (in seconds)
+- nx*ny single floats for each item and each column
+ 
+9. portations to other platforms
+================================ 
+The platform specific handlic should be ideally restricted to the file
+"grafix.mk" 
+which is included by the Makefile.
+
+Here the paths to the compiler an Xlib can be set depending on HOSTTYPE,
+and possibly compiler definitions set.
+
+

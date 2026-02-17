@@ -1,0 +1,42 @@
+* edit-windows : focus
+
+ > Also, the text cursor in edit_window doesn't work on the HP, but does on
+ > the Sun server.  But under the sun server and OLWM it doesn accept the
+ > keyboard focus properly; I have to click in the main window's title bar
+ > first to set the focus to the window, and then click in the edit_window. 
+ > On the HP under MWM I can just click in the edit_window, and the focus 
+ > changes and the title bar gets highlighted.  I suspect that OLWM is less 
+ > tolerant of applications that don't play by the rules for requesting 
+ > keyboard focus - I'll try to see if I can fix this.
+ > 
+
+* lattice : 
+   - fuer grosse z-Werte Darstellung begrenzen (Laufzeit !)
+
+* class-browser : loop-Fehler, graph. Anordnung der buttons verbessern
+
+* customizations : button-colors, backgrd-color, click-to-type 
+  from .Xresources and/or local custom-file
+
+* makefile, grafix.mk clean up
+
+* better icons !
+
+* replay hangs after few steps when *both* spawn and synchron are active !
+    (synchr seems to fail)
+
+* rotate mode for lattices, region manager should open a new lattice window, 
+	and both views can be shown simultaniously
+
+* class_browser : popup windows should display whole file 
+	(but scrollbar set according to class def. in text)
+
+> Just a couple of points:  In win-demo, pulldown1 does not work properly,
+> but pulldown2 does.   Secondly, in the file-browser, after resizing the
+> window all the columns are used, but only the number of rows from the
+> original sized window.
+
+* dir-tree could be easily extended 
+	display directory content on button press :
+	- full directory info (access permissions, date)
+	-
